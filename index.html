@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Happy Birthday Zyn!</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #fff;
+      color: #000;
+      text-align: center;
+      overflow-x: hidden;
+      padding-bottom: 100px;
+    }
+    h1 {
+      font-size: 80px;
+      margin-top: 50px;
+      color: gold;
+      text-shadow: 3px 3px 10px #ff0080;
+    }
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      top: -10px;
+      animation: fall 5s linear infinite;
+    }
+    @keyframes fall {
+      to { transform: translateY(110vh) rotate(360deg); }
+    }
+    .game { margin-top: 100px; }
+    canvas { background: #f0f0f0; border: none; display: block; margin: 0 auto; }
+
+    /* Secret button */
+    #secretButton {
+      position: fixed;
+      bottom: 15px;
+      right: 15px;
+      background: darkred;
+      color: white;
+      border: none;
+      font-size: 14px;
+      padding: 6px 8px;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 1000;
+      box-shadow: 0 0 5px red;
+      transition: 0.3s;
+    }
+    #secretButton:hover { background: crimson; box-shadow: 0 0 15px red; }
+
+    /* Creepy font */
+    @import url('https://fonts.googleapis.com/css2?family=Creepster&display=swap');
+    .creepy { font-family: 'Creepster', cursive; color: darkred !important; text-shadow: 2px 2px 20px crimson !important; }
+
+    /* Secret page */
+    #secretPage { display:none; text-align:center; padding:100px; }
+    #secretPage img { width:400px; max-width:90%; filter: contrast(150%) brightness(60%); }
+  </style>
+</head>
+<body>
+
+  <h1>🎉 Happy Birthday Zyn 🎉</h1>
+  <div id="confetti-container"></div>
+
+  <!-- Game 1: Click the Shirt -->
+  <div class="game" id="game1">
+    <h2>Mini Game 1: Click the Shirt 👕</h2>
+    <canvas id="gameCanvas1" width="400" height="400"></canvas>
+    <p id="score1">Score: 0</p>
+  </div>
+
+  <!-- Game 2: Catch the Mask -->
+  <div class="game" id="game2">
+    <h2>Mini Game 2: Catch the Mask 🎭</h2>
+    <canvas id="gameCanvas2" width="400" height="400"></canvas>
+    <p id="score2">Score: 0</p>
+  </div>
+
+  <!-- Game 3: Balloon Pop -->
+  <div class="game" id="game3">
+    <h2>Mini Game 3: Pop the Balloons 🎈</h2>
+    <canvas id="canvas3" width="400" height="400"></canvas>
+    <p id="score3">Score: 0</p>
+  </div>
+
+  <!-- Secret page: Mandela Catalogue -->
+  <div id="secretPage">
+    <h1 id="gabrielText">⚠ GABRIEL HAS SPOKEN ⚠</h1>
+    <img id="gabrielImg" src="https://i.imgur.com/HqfV4wK.png" alt="Gabriel">
+    <p style="margin-top:20px; font-size:20px; color:red;">YOU SHOULD NOT HAVE COME HERE.</p>
+  </div>
+
+  <!-- Secret button -->
+  <button id="secretButton">☠</button>
+
+  <script>
+    /* ---------------- Confetti ---------------- */
+    const confettiContainer = document.getElementById('confetti-container');
+    for (let i = 0; i < 100; i++) {
+      const confetti = document.createElement('div');
+      confetti.classList.add('confetti');
+      confetti.style.left = Math.random() * 100 + 'vw';
+      confetti.style.background = `hsl(${Math.random()*360},100%,50%)`;
+      confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+      confetti.style.opacity = Math.random();
+      confettiContainer.appendChild(confetti);
+    }
+
+    /* ---------------- Game 1: Click the Shirt ---------------- */
+    const canvas1 = document.getElementById("gameCanvas1");
+    const ctx1 = canvas1.getContext("2d");
+    let score1 = 0;
+
+    function randomShirt() {
+      return { x: Math.random()*350+25, y: Math.random()*350+25, width:40, height:50, color:`hsl(${Math.random()*360},80%,50%)` };
+    }
+
+    let shirt = randomShirt();
+    function drawShirt() {
+      ctx1.clearRect(0,0,canvas1.width,canvas1.height);
+      ctx1.fillStyle = shirt.color;
+      ctx1.fillRect(shirt.x, shirt.y, shirt.width, shirt.height);
+
+      ctx1.beginPath();
+      ctx1.moveTo(shirt.x, shirt.y); ctx1.lineTo(shirt.x-10, shirt.y+15); ctx1.lineTo(shirt.x, shirt.y+20);
+      ctx1.closePath(); ctx1.fill();
+
+      ctx1.beginPath();
+      ctx1.moveTo(shirt.x+shirt.width, shirt.y); ctx1.lineTo(shirt.x+shirt.width+10, shirt.y+15); ctx1.lineTo(shirt.x+shirt.width, shirt.y+20);
+      ctx1.closePath(); ctx1.fill();
+    }
+    canvas1.addEventListener("click", (e)=>{
+      const rect = canvas1.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      if(mouseX >= shirt.x && mouseX <= shirt.x+shirt.width && mouseY >= shirt.y && mouseY <= shirt.y+shirt.height){
+        score1++; document.getElementById("score1").textContent = "Score: "+score1;
+        shirt = randomShirt(); drawShirt();
+      }
+    });
+    drawShirt();
+
+    /* ---------------- Game 2: Catch the Mask ---------------- */
+    const canvas2 = document.getElementById("gameCanvas2");
+    const ctx2 = canvas2.getContext("2d");
+    let score2 = 0;
+    let bucket = { x:180, y:350, width:60, height:20 };
+    let mask = { x:Math.random()*380, y:0, size:20 };
+
+    function drawMask(x,y,size){
+      ctx2.fillStyle="purple"; ctx2.beginPath(); ctx2.ellipse(x,y,size,size*0.6,0,0,Math.PI*2); ctx2.fill();
+      ctx2.fillStyle="white"; ctx2.beginPath(); ctx2.arc(x-size/3,y,size/6,0,Math.PI*2); ctx2.arc(x+size/3,y,size/6,0,Math.PI*2); ctx2.fill();
+    }
+
+    function drawMaskGame(){
+      ctx2.clearRect(0,0,canvas2.width,canvas2.height);
+      ctx2.fillStyle="brown"; ctx2.fillRect(bucket.x,bucket.y,bucket.width,bucket.height);
+      drawMask(mask.x,mask.y,mask.size);
+    }
+
+    function updateMaskGame(){
+      mask.y+=3; if(mask.y>canvas2.height) mask={x:Math.random()*380,y:0,size:20};
+      if(mask.y+mask.size>=bucket.y && mask.x>=bucket.x && mask.x<=bucket.x+bucket.width){
+        score2++; document.getElementById("score2").textContent="Score: "+score2;
+        mask={x:Math.random()*380,y:0,size:20};
+      }
+      drawMaskGame();
+      requestAnimationFrame(updateMaskGame);
+    }
+
+    document.addEventListener("keydown",(e)=>{
+      if(e.key==="ArrowLeft" && bucket.x>0) bucket.x-=20;
+      if(e.key==="ArrowRight" && bucket.x<canvas2.width-bucket.width) bucket.x+=20;
+    });
+    updateMaskGame();
+
+    /* ---------------- Game 3: Balloon Pop ---------------- */
+    const canvas3=document.getElementById("canvas3"); const ctx3=canvas3.getContext("2d");
+    let balloons=[], score3=0, secretActive=false, bloodSplatters=[];
+
+    class Balloon{ constructor(x,y,radius,color){ this.x=x; this.y=y; this.radius=radius; this.color=color; this.popped=false; }
+      draw(){ if(!this.popped){ ctx3.beginPath(); ctx3.arc(this.x,this.y,this.radius,0,Math.PI*2); ctx3.fillStyle=this.color; ctx3.fill(); ctx3.closePath(); } }
+      update(){ this.y-=1; if(this.y+this.radius<0) this.y=canvas3.height+this.radius; this.draw(); }
+      pop(){ this.popped=true; if(secretActive) bloodSplatters.push({x:this.x,y:this.y,radius:this.radius,life:1}); else launchConfetti(this.x,this.y); }
+    }
+    for(let i=0;i<8;i++) balloons.push(new Balloon(Math.random()*canvas3.width,Math.random()*canvas3.height,20,"hsl("+Math.random()*360+",70%,60%)"));
+
+    canvas3.addEventListener("click",(e)=>{
+      const rect=canvas3.getBoundingClientRect();
+      const mouseX=e.clientX-rect.left; const mouseY=e.clientY-rect.top;
+
+      // Secret: activate horror mode
+      if(mouseX>canvas3.width-40 && mouseY>canvas3.height-40 && !secretActive){ activateDarkSecret(); return; }
+
+      balloons.forEach(b=>{ let dist=Math.hypot(b.x-mouseX,b.y-mouseY); if(dist<b.radius && !b.popped) b.pop(); });
+    });
+
+    function drawBlood(){
+      bloodSplatters.forEach((s,i)=>{ ctx3.beginPath(); ctx3.arc(s.x,s.y,s.radius*s.life,0,Math.PI*2); ctx3.fillStyle="darkred"; ctx3.fill(); ctx3.closePath(); s.life-=0.01; if(s.life<=0) bloodSplatters.splice(i,1); });
+    }
+
+    function animateGame3(){ ctx3.clearRect(0,0,canvas3.width,canvas3.height); balloons.forEach(b=>b.update()); if(secretActive) drawBlood(); requestAnimationFrame(animateGame3); }
+    animateGame3();
+
+    /* ---------------- Secret Button / Mandela Page ---------------- */
+    const secretBtn=document.getElementById("secretButton");
+    const secretPage=document.getElementById("secretPage");
+
+    secretBtn.addEventListener("click",()=>{
+      // Hide normal content
+      document.querySelector("h1").style.display="none";
+      document.getElementById("game1").style.display="none";
+      document.getElementById("game2").style.display="none";
+      document.getElementById("game3").style.display="none";
+      secretBtn.style.display="none";
+      document.getElementById("confetti-container").style.display="none";
+
+      // Show secret Mandela page
+      secretPage.style.display="block";
+      document.body.style.background="black";
+      document.body.style.color="red";
+      document.getElementById("gabrielText").classList.add("creepy");
+
+      // Text glitch
+      setInterval(()=>{ const t=document.getElementById("gabrielText"); t.style.textShadow=`${Math.random()*5}px ${Math.random()*5}px crimson`; },200);
+
+      // Dripping blood effect
+      for(let i=0;i<80;i++){
+        const blood=document.createElement('div'); blood.classList.add('confetti');
+        blood.style.left=Math.random()*100+'vw'; blood.style.width="4px"; blood.style.height=(Math.random()*25+8)+'px';
+        blood.style.background="darkred"; blood.style.animationDuration=(Math.random()*2+2)+'s'; blood.style.opacity=1;
+        confettiContainer.appendChild(blood);
+      }
+    });
+
+    // Optional function for confetti on balloon pop (normal mode)
+    function launchConfetti(x,y){ const c=document.createElement('div'); c.classList.add('confetti'); c.style.left=x+'px'; c.style.top=y+'px'; c.style.background=`hsl(${Math.random()*360},100%,50%)`; c.style.width='5px'; c.style.height='5px'; c.style.opacity=1; confettiContainer.appendChild(c); }
+  </script>
+</body>
+</html>
